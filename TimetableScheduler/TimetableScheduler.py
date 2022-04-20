@@ -39,6 +39,15 @@ class TimetableEntry:
     def __repr__(self) -> str:
         return self.__str__()
 
+    @staticmethod
+    def compare(slot0, slot1):
+        if slot0.day.value[0] < slot1.day.value[0]:
+            return -1
+        elif slot1.day.value[0] < slot0.day.value[0]:
+            return 1
+        else:
+            return slot0.startMinute - slot1.startMinute
+
 
 class Course:
 
@@ -76,8 +85,55 @@ def get_combination_intersection_time(combination):
                 intersecting_courses.append((combination[i], combination[j]))
     return time, intersecting_courses
 
+def get_day_windows(dayTimetable):
+
+    windows = [] 
+    time_sum = 0
+
+    dayTimetable.sort(key = cmp_to_key(TimetableEntry.compare))
+
+    prev_end = None
+    for slot in dayTimetable:
+        if prev_end is None:
+            prev_end = slot.endMinute
+            continue
+
+        diff = slot.startMinute - prev_end
+        if diff > 0:
+            windows.append((slot.day, prev_end, slot.startMinute))
+            time_sum += diff
+
+        prev_end = slot.endMinute
+
+    return time_sum, windows
+
 def get_combination_window_time(combination):
-    return 0
+
+    windowsSum = 0
+
+    dayTimetables = {}
+    windows = []
+
+    for course in combination:
+        for slot in course.timeSlots:
+           
+            arr = []
+            if slot.day.value[0] not in dayTimetables:                
+                dayTimetables[slot.day.value[0]] = arr    
+            else:
+                arr = dayTimetables[slot.day.value[0]]
+
+            arr.append(slot)
+
+    for dayIndex in range(1, 8):
+        if dayIndex not in dayTimetables:
+            continue
+        dayTimetable, dayWindows = get_day_windows(dayTimetables[dayIndex])
+        windowsSum += dayTimetable
+        for window in dayWindows:
+            windows.append(window)
+
+    return windowsSum, windows
 
 def print_combination(combination):
     for course in combination:
@@ -110,7 +166,7 @@ def combination_comparator(tuple0, tuple1):
     elif intersectionTime0 > intersectionTime1:
         return 1
     else: 
-        return windowTime1 - windowTime0
+        return windowTime0 - windowTime1
 
 def course_tuple_to_string(course_tuple):
     text = ""
@@ -139,8 +195,8 @@ def get_combinations(courses, maxLength, cutoffIntersectionTime=10000):
         if intersection_time > cutoffIntersectionTime:
             continue
 
-        window_time = get_combination_window_time(combination)
-        combination_info = (combination, intersection_time, window_time, intersecting_courses)
+        window_time, window_list = get_combination_window_time(combination)
+        combination_info = (combination, intersection_time, window_time, intersecting_courses, window_list)
         combination_list.append(combination_info)
 
     combination_list.sort(key = cmp_to_key(combination_comparator))
@@ -253,13 +309,24 @@ with open("Output.txt", "w") as f:
             f.write(str(course))
             f.write("\n")
 
-        f.write(f"Intersection Time: {combination_info[1]} minutes\n")
-        #f.write(f"Window Time: {combination_info[2]} minutes\n")
+        f.write(f"\tIntersection Time: {combination_info[1]} minutes\n")        
         if combination_info[3]:
-            f.write(f"Intersections: ")
+            f.write(f"\tIntersections: ")
             for course_tuple in combination_info[3]:
                 f.write(f"[{course_tuple_to_string(course_tuple)}] ")
             f.write("\n")
+       
+        f.write(f"\tWindow Time: {combination_info[2]} minutes\n")
+        if combination_info[4]:
+            f.write(f"\tWindows: ")
+            for window_tuple in combination_info[4]:
+                hour1 = int(window_tuple[1] / 60)
+                minute1 = int(window_tuple[1] % 60)
+                hour2 = int(window_tuple[2] / 60)
+                minute2 = int(window_tuple[2] % 60)
+                f.write(f"[{window_tuple[0].name} {hour1}:{minute1} - {hour2}:{minute2}] ")
+            f.write("\n")
+
         f.write("\n")
 
         number_to_print -= 1
