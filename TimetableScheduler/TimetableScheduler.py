@@ -66,11 +66,15 @@ class Course:
         return time
 
 def get_combination_intersection_time(combination):
+    intersecting_courses = []
     time = 0
     for i in range(len(combination)):
         for j in range(i + 1, len(combination)):
-            time += combination[i].get_intersection_time(combination[j])
-    return time 
+            intersection = combination[i].get_intersection_time(combination[j])
+            time += intersection
+            if intersection > 0:
+                intersecting_courses.append((combination[i], combination[j]))
+    return time, intersecting_courses
 
 def get_combination_window_time(combination):
     return 0
@@ -108,7 +112,16 @@ def combination_comparator(tuple0, tuple1):
     else: 
         return windowTime1 - windowTime0
 
-def get_combinations(courses, maxLength):
+def course_tuple_to_string(course_tuple):
+    text = ""
+    for course_index in range(len(course_tuple)):
+        text += course_tuple[course_index].name
+        if course_index < len(course_tuple) - 1:
+            text += ", "
+
+    return text
+
+def get_combinations(courses, maxLength, cutoffIntersectionTime=10000):
     mandatory_courses = []
     for course in courses:
         if course.isMandatory:
@@ -122,9 +135,12 @@ def get_combinations(courses, maxLength):
         if not validate_combination(combination, mandatory_courses):
             continue
 
-        intersection_time = get_combination_intersection_time(combination)
+        intersection_time, intersecting_courses = get_combination_intersection_time(combination)
+        if intersection_time > cutoffIntersectionTime:
+            continue
+
         window_time = get_combination_window_time(combination)
-        combination_info = (combination, intersection_time, window_time)
+        combination_info = (combination, intersection_time, window_time, intersecting_courses)
         combination_list.append(combination_info)
 
     combination_list.sort(key = cmp_to_key(combination_comparator))
@@ -224,20 +240,26 @@ courses = [
 
 print(f"Courses number: {len(courses)}")
 
-combination_infos = get_combinations(courses, 6)
+combination_infos = get_combinations(courses, 6, 60)
 
 print(f"Filtered combinations number: {len(combination_infos)}")
 
 number_to_print = len(combination_infos)
 
 with open("Output.txt", "w") as f:
-    for combination_info in combination_infos:
+    for i in range(len(combination_infos)):
+        combination_info = combination_infos[i]
         for course in combination_info[0]:
             f.write(str(course))
             f.write("\n")
 
         f.write(f"Intersection Time: {combination_info[1]} minutes\n")
         #f.write(f"Window Time: {combination_info[2]} minutes\n")
+        if combination_info[3]:
+            f.write(f"Intersections: ")
+            for course_tuple in combination_info[3]:
+                f.write(f"[{course_tuple_to_string(course_tuple)}] ")
+            f.write("\n")
         f.write("\n")
 
         number_to_print -= 1
