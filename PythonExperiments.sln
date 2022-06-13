@@ -9,6 +9,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "WaveVisualizer", "WaveVisua
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TimetableScheduler", "TimetableScheduler\TimetableScheduler.pyproj", "{F954B5AF-F34B-4498-A9BA-7691E18A05CD}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DotaRating", "DotaRating\DotaRating.pyproj", "{7AE846A3-A754-4719-AE5B-1FEF7D07F8DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,8 @@ Global
 		{EE1F5478-433E-47AF-9140-25650C1BE5CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F954B5AF-F34B-4498-A9BA-7691E18A05CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F954B5AF-F34B-4498-A9BA-7691E18A05CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AE846A3-A754-4719-AE5B-1FEF7D07F8DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AE846A3-A754-4719-AE5B-1FEF7D07F8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

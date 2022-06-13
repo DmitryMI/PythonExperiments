@@ -1,41 +1,112 @@
+alphabet = [
+    '4',    # A
+    '6',    # B
+    '<',    # C
+    '|)',   # D
+    '3',    # E
+    '|=',   # F
+    '(;',   # G
+    '|-|',  # H
+    '!',    # I
+    '_|',   # J
+    '|{',   # K 
+    '|_',   # L
+    '|\/|', # M
+    '|\|',  # N
+    '0',    # O
+    '|>',   # P
+    'O_',   # Q
+    '|?',   # R
+    '5',    # S
+    "'|'",  # T
+    '(_)',  # U
+    '\/',   # V
+    '\|/',  # W
+    '><',   # X
+    "`|",   # Y
+    '2'     # Z
+]
 
-class ModArrayMapper:
+def get_leet_for_char(current_char):
+    index = ord(current_char) - 65
+    sub_alphabet = alphabet[index]
+    leet_symbol = choice(sub_alphabet)
 
-    def __init__(self, array, mod, rem):
-        self.array = array
-        self.mod = mod
-        self.rem = rem         
-
-    def __iter__(self):
-        for i in range(len(self.array)):
-            if i % self.mod == self.rem:
-                yield self.array[i]
-
-class ArrayMerger:
-    def __init__(self, array_list):
-        self.array_list = array_list
-        self.length = max(map(len, self.array_list))
-
-    def __iter__(self):
-        item_index = 0
-        for i in range(self.length):
-            for array in self.array_list:
-                if len(array) > item_index:
-                    yield array[item_index]
-            item_index += 1
+    return leet_symbol
 
 
-arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-print(arr)
+def respects_phano():
+    for i in range(len(alphabet)):
+        for j in range(len(alphabet)):
+            if i == j:
+                continue
+            if alphabet[i].startswith(alphabet[j]):
+                return False, i, j
 
-mapper_even = ModArrayMapper(arr, 2, 0)
-mapper_odd = ModArrayMapper(arr, 2, 1)
+    return True, None, None
 
-even = sorted(mapper_even)
-odd = sorted(mapper_odd, reverse=True)
+def get_index_of_letter(letter):
+    symbol = letter.lower()
+    index = ord(symbol) - ord('a')
+    return index
 
-print(even)
-print(odd)
+def get_letter_from_index(index):
+    ascii_code = index + ord('a')
+    return chr(ascii_code)
 
-merger = ArrayMerger([even, odd])
-print(list(merger))
+def forward_conversion(text):
+    result = ""
+    for i in text:
+        index = get_index_of_letter(i)
+
+        if i == ' ':
+            result += '___ '
+        elif index < 0 or index > len(alphabet):
+            pass
+        else:
+            result += alphabet[index] + ' '
+    return result
+
+def backward_conversion(leet_untrimmed):
+    leet = ""
+    for i, symbol in enumerate(leet_untrimmed):
+        if symbol != ' ' or i == len(leet) - 1:
+            leet += symbol
+        elif leet_untrimmed[i + 1] == ' ':
+            leet += ' '
+
+    result = ""
+
+    code_accumulator = ""
+    for i, symbol in enumerate(leet):
+
+        if symbol == " ":
+            result += " "
+            continue
+
+        code_accumulator += symbol
+        code_match = False
+        for code_index, code in enumerate(alphabet):
+            if code_accumulator == code:                
+                code_match = True
+                letter = get_letter_from_index(code_index)
+                result += letter
+                break
+        if code_match:
+            code_accumulator = ""      
+
+    return result
+
+
+phano_respected, codeA, codeB = respects_phano()
+if not phano_respected:
+    print(f"Warning! Phano rule is violated by {get_letter_from_index(codeA)} {alphabet[codeA]} and {get_letter_from_index(codeB)} {alphabet[codeB]}")
+
+while True:
+    text = input("Text: ")    
+    leet = forward_conversion(text)
+    print(leet)
+
+    leet = input("Leet: ")
+    text = backward_conversion(leet)
+    print(text)
